@@ -498,7 +498,11 @@ void Thermostat() {
     else
       Output = 255;
   }
-  analogWrite(CONTROL_PIN, HEATER_PWM);  // set heater PWM 设置加热器PWM
+  float limit = 1;
+  if(VoltageValue < 3){
+    limit = 0.7;
+  }
+  analogWrite(CONTROL_PIN, limit * (HEATER_PWM));  // set heater PWM 设置加热器PWM
 }
 
 // creates a short beep on the buzzer 在蜂鸣器上创建一个短的哔哔声

@@ -1,5 +1,5 @@
 // Firmware version
-#define VERSION "v4.1" //20230321
+#define VERSION "v4.2" //20230412
 #define VERSION_NUM 400
 
 // Type of MOSFET
@@ -57,7 +57,7 @@
 #define SMOOTHIE          0.05  // OpAmp输出平滑系数 (1=无平滑; 默认：0.05)
 #define PID_ENABLE        false // enable PID control
 #define BEEP_ENABLE       true  // enable/disable buzzer
-#define VOLTAGE_VALUE     3     // 电压值
+#define VOLTAGE_VALUE     2     // 电压值
 #define QC_ENABLE         false // enable/disable QC3.0
 #define MAINSCREEN        1     // type of main screen (0: big numbers; 1: more infos)
 
