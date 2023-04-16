@@ -166,13 +166,18 @@ void setup() {
   pinMode(SENSOR_PIN, INPUT);
   pinMode(VIN_PIN, INPUT);
   pinMode(BUZZER_PIN, OUTPUT);
-  pinMode(CONTROL_PIN, OUTPUT);
+  // pinMode(CONTROL_PIN, OUTPUT);
   pinMode(BUTTON_P_PIN, INPUT_PULLUP);
   pinMode(BUTTON_N_PIN, INPUT_PULLUP);
   pinMode(BUTTON_PIN, INPUT_PULLUP);
 
-  analogWrite(CONTROL_PIN,
-              HEATER_OFF);  // this shuts off the heater这是用来关闭加热器的
+  ledcSetup(CONTROL_CHANNEL, CONTROL_FREQ, CONTROL_RES);
+  ledcAttachPin(CONTROL_PIN, CONTROL_CHANNEL);
+
+  // analogWrite(CONTROL_PIN, HEATER_OFF); // this shuts off the heater这是用来关闭加热器的
+  ledcWrite(CONTROL_CHANNEL, HEATER_OFF);
+
+
   // digitalWrite(BUZZER_PIN, LOW);        // must be LOW when buzzer not in
   // use当蜂鸣器不使用时，必须是低电平
 
@@ -225,12 +230,12 @@ void setup() {
 
   // turn on heater if iron temperature is well below setpoint
   // 如果烙铁头温度远低于设定值，则打开加热器
-  float limit = 0;
+  float limit = 255;
   if (VoltageValue < 3) {
-    limit = 178;
+    limit = TEMP_POWER_LIMIT;
   }
   if (((CurrentTemp + 20) < DefaultTemp) && !inLockMode)
-    analogWrite(CONTROL_PIN, constrain(HEATER_ON, 0, limit));
+    ledcWrite(CONTROL_CHANNEL, constrain(HEATER_ON, 0, limit));
 
   // set PID output range and start the PID
   // 设置PID输出范围，启动PID
@@ -341,15 +346,15 @@ void SLEEPCheck() {
     if (handleMoved) {  // if handle was moved 如果手柄被移动
       u8g2.setPowerSave(0);
       if (inSleepMode) {  // in sleep or off mode? 在睡眠模式还是关机模式?
-        float limit = 0;
+        float limit = 255;
         if (VoltageValue < 3) {
-          limit = 178;
+          limit = TEMP_POWER_LIMIT;
         }
-        if ((CurrentTemp + 20) < SetTemp)                            // if temp is well below setpoint 如果温度远低于设定值
-          analogWrite(CONTROL_PIN, constrain(HEATER_ON, 0, limit));  // then start the heater right now 那现在就启动加热器
-        beep();                                                      // beep on wake-up
-        beepIfWorky = true;                                          // beep again when working temperature is reached
-                                                                     // 当达到工作温度，会发出蜂鸣声
+        if ((CurrentTemp + 20) < SetTemp)                              // if temp is well below setpoint 如果温度远低于设定值
+          ledcWrite(CONTROL_CHANNEL, constrain(HEATER_ON, 0, limit));  // then start the heater right now 那现在就启动加热器
+        beep();                                                        // beep on wake-up
+        beepIfWorky = true;                                            // beep again when working temperature is reached
+                                                                       // 当达到工作温度，会发出蜂鸣声
       }
       handleMoved = false;  // reset handleMoved flag
       inSleepMode = false;  // reset sleep flag
@@ -395,7 +400,7 @@ void SENSORCheck() {
   }
   // #endif
 
-  analogWrite(CONTROL_PIN, HEATER_OFF);     // shut off heater in order to measure
+  ledcWrite(CONTROL_CHANNEL, HEATER_OFF);   // shut off heater in order to measure
                                             // temperature 关闭加热器以测量温度
   delayMicroseconds(TIME2SETTLE);           // wait for voltage to settle 等待电压稳定
   double temp = denoiseAnalog(SENSOR_PIN);  // 读取ADC值的温度
@@ -404,12 +409,12 @@ void SENSORCheck() {
     Vin = getVIN();  // get Vin every now and then 时不时去获取VIN电压
 
   if (!inLockMode) {
-    float limit = 0;
+    float limit = 255;
     if (VoltageValue < 3) {
-      limit = 178;
+      limit = TEMP_POWER_LIMIT;
     }
-    analogWrite(CONTROL_PIN,
-                constrain(HEATER_PWM, 0, limit));  // turn on again heater 再次打开加热器
+    ledcWrite(CONTROL_CHANNEL,
+              constrain(HEATER_PWM, 0, limit));  // turn on again heater 再次打开加热器
   }
 
   RawTemp += (temp - RawTemp) * SMOOTHIE;  // stabilize ADC temperature reading 稳定ADC温度读数
@@ -419,7 +424,8 @@ void SENSORCheck() {
   // 稳定显示温度时，周围的设定值
   if ((ShowTemp != Setpoint) || (abs(ShowTemp - CurrentTemp) > 5))
     ShowTemp = CurrentTemp;
-  if (abs(ShowTemp - Setpoint) <= 1) ShowTemp = Setpoint;
+  if (abs(ShowTemp - Setpoint) <= 1)
+    ShowTemp = Setpoint;
   if (inLockMode) {
     ShowTemp = 0;
   }
@@ -429,7 +435,8 @@ void SENSORCheck() {
   // 温度在工作范围内可设置状态变量;当工作温度刚刚达到时，会发出蜂鸣声
   gap = abs(SetTemp - CurrentTemp);
   if (gap < 5) {
-    if (!isWorky && beepIfWorky) beep();
+    if (!isWorky && beepIfWorky)
+      beep();
     isWorky = true;
     beepIfWorky = false;
   } else
@@ -437,9 +444,10 @@ void SENSORCheck() {
 
   // checks if tip is present or currently inserted
   // 检查烙铁头是否存在或当前已插入
-  if (ShowTemp > 500) TipIsPresent = false;  // tip removed ? 烙铁头移除？
+  if (ShowTemp > 500)
+    TipIsPresent = false;                    // tip removed ? 烙铁头移除？
   if (!TipIsPresent && (ShowTemp < 500)) {   // new tip inserted ? 新的烙铁头插入？
-    analogWrite(CONTROL_PIN, HEATER_OFF);    // shut off heater 关闭加热器
+    ledcWrite(CONTROL_CHANNEL, HEATER_OFF);  // shut off heater 关闭加热器
     beep();                                  // beep for info
     TipIsPresent = true;                     // tip is present now 烙铁头已经存在
     ChangeTipScreen();                       // show tip selection screen 显示烙铁头选择屏幕
@@ -501,11 +509,11 @@ void Thermostat() {
     else
       Output = 255;
   }
-  float limit = 0;
+  float limit = 255;
   if (VoltageValue < 3) {
-    limit = 178;
+    limit = TEMP_POWER_LIMIT;
   }
-  analogWrite(CONTROL_PIN, constrain((HEATER_PWM), 0, limit));  // set heater PWM 设置加热器PWM
+  ledcWrite(CONTROL_CHANNEL, constrain((HEATER_PWM), 0, limit));  // set heater PWM 设置加热器PWM
 }
 
 // creates a short beep on the buzzer 在蜂鸣器上创建一个短的哔哔声
@@ -617,7 +625,7 @@ void MainScreen() {
 
 // setup screen 设置屏幕
 void SetupScreen() {
-  analogWrite(CONTROL_PIN, HEATER_OFF);  // shut off heater
+  ledcWrite(CONTROL_CHANNEL, HEATER_OFF);  // shut off heater
   beep();
   uint16_t SaveSetTemp = SetTemp;
   uint8_t selection = 0;
@@ -810,7 +818,8 @@ uint8_t MenuScreen(const char *Items[][language_types], uint8_t numberOfItems,
   bool isTipScreen = ((strcmp(Items[0][language], "烙铁头:") == 0) || (strcmp(Items[0][language], "Tip:") == 0) || (strcmp(Items[0][language], "烙鐵頭:") == 0));
   uint8_t lastselected = selected;
   int8_t arrow = 0;
-  if (selected) arrow = 1;
+  if (selected)
+    arrow = 1;
   numberOfItems = numberOfItems / language_types;
   numberOfItems >>= 2;
 
@@ -946,7 +955,8 @@ void ChangeTipScreen() {
   uint8_t selected = CurrentTip;
   uint8_t lastselected = selected;
   int8_t arrow = 0;
-  if (selected) arrow = 1;
+  if (selected)
+    arrow = 1;
   setRotary(0, NumberOfTips - 1, 1, selected);
   bool lastbutton = (!digitalRead(BUTTON_PIN));
 
@@ -1037,12 +1047,13 @@ void CalibrationScreen() {
     delay(10);
   }
 
-  analogWrite(CONTROL_PIN, HEATER_OFF);  // shut off heater 关闭加热器
-  delayMicroseconds(TIME2SETTLE);        // wait for voltage to settle 等待电压稳定
-  CalTempNew[3] = getChipTemp();         // read chip temperature 读芯片温度
+  ledcWrite(CONTROL_CHANNEL, HEATER_OFF);  // shut off heater 关闭加热器
+  delayMicroseconds(TIME2SETTLE);          // wait for voltage to settle 等待电压稳定
+  CalTempNew[3] = getChipTemp();           // read chip temperature 读芯片温度
   if ((CalTempNew[0] + 10 < CalTempNew[1]) && (CalTempNew[1] + 10 < CalTempNew[2])) {
     if (MenuScreen(StoreItems, sizeof(StoreItems), 0)) {
-      for (uint8_t i = 0; i < 4; i++) CalTemp[CurrentTip][i] = CalTempNew[i];
+      for (uint8_t i = 0; i < 4; i++)
+        CalTemp[CurrentTip][i] = CalTempNew[i];
     }
   }
 
@@ -1075,7 +1086,8 @@ void InputNameScreen() {
         u8g2.setCursor(12 * digit, 48 + SCREEN_OFFSET);
         u8g2.print(char(94));
         u8g2.setCursor(0, 32 + SCREEN_OFFSET);
-        for (uint8_t i = 0; i < digit; i++) u8g2.print(TipName[CurrentTip][i]);
+        for (uint8_t i = 0; i < digit; i++)
+          u8g2.print(TipName[CurrentTip][i]);
         u8g2.setCursor(12 * digit, 32 + SCREEN_OFFSET);
         u8g2.print(char(value));
       } while (u8g2.nextPage());
@@ -1103,7 +1115,8 @@ void DeleteTipScreen() {
       for (uint8_t i = CurrentTip; i < (NumberOfTips - 1); i++) {
         for (uint8_t j = 0; j < TIPNAMELENGTH; j++)
           TipName[i][j] = TipName[i + 1][j];
-        for (uint8_t j = 0; j < 4; j++) CalTemp[i][j] = CalTemp[i + 1][j];
+        for (uint8_t j = 0; j < 4; j++)
+          CalTemp[i][j] = CalTemp[i + 1][j];
       }
     }
     NumberOfTips--;
@@ -1229,11 +1242,13 @@ int32_t variance(int16_t a[]) {
   // Compute mean (average of elements)计算平均值(元素的平均值)
   int32_t sum = 0;
 
-  for (int i = 0; i < 32; i++) sum += a[i];
+  for (int i = 0; i < 32; i++)
+    sum += a[i];
   int16_t mean = (int32_t)sum / 32;
   // Compute sum squared differences with mean.计算和平方差的平均值
   int32_t sqDiff = 0;
-  for (int i = 0; i < 32; i++) sqDiff += (a[i] - mean) * (a[i] - mean);
+  for (int i = 0; i < 32; i++)
+    sqDiff += (a[i] - mean) * (a[i] - mean);
   return (int32_t)sqDiff / 32;
 }
 
@@ -1434,3 +1449,17 @@ void turnOffHeater(Button2 &b) {
 //   }
 //   return vref;
 // }
+
+void heatWithLimit() {
+  // ledcSetup(channel, hertz, resolution);
+  // ledcAttachPin(pin, channel);
+
+  float limit = 0;
+  if (VoltageValue < 3) {
+    limit = TEMP_POWER_LIMIT;
+  } else if (VoltageValue == 3) {
+    limit = 255;
+  }
+  ledcWrite(CONTROL_CHANNEL,
+            constrain(HEATER_PWM, 0, limit));  // turn on again heater 再次打开加热器
+}

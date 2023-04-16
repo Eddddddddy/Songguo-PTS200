@@ -1,6 +1,6 @@
 // Firmware version
-#define VERSION "v4.2.1" //20230414
-#define VERSION_NUM 400
+#define VERSION "v4.2.2" //20230414
+#define VERSION_NUM 422
 
 // Type of MOSFET
 #define P_MOSFET // P_MOSFET or N_MOSFET
@@ -23,6 +23,9 @@
 #define BUTTON_P_PIN      4     // 1 键位为“+”
 #define BUTTON_N_PIN      2     // 2 键位为“-”
 #define CONTROL_PIN       5     // heater MOSFET PWM control 加热器MOSFET PWM控制
+#define CONTROL_CHANNEL   1     // PWM channel
+#define CONTROL_FREQ      10000 // PWM frequency
+#define CONTROL_RES       8     // PWM resolution
 
 #define PD_CFG_0          16
 #define PD_CFG_1          17
@@ -35,6 +38,7 @@
 #define TEMP_SLEEP        150   // 休眠温度
 #define TEMP_BOOST        50    // 升温步进
 #define TEMP_STEP         10    // 旋转编码器温度变化步进
+#define TEMP_POWER_LIMIT  150   // 功率限制
 
 // 默认的T12烙铁头温度校准值
 #define TEMP200           200   // temperature at ADC = 200 
@@ -44,7 +48,7 @@
 #define CALNUM            4     // Calibration point number
 #define TIPMAX            8     // max number of tips
 #define TIPNAMELENGTH     6     // max length of tip names (including termination)
-#define TIPNAME           "T12  " // default tip name
+#define TIPNAME           "PTS  " // default tip name
 
 // 默认的定时器值 (0 = 禁用)
 #define TIME2SLEEP        60    // 几秒钟后进入睡眠模式
