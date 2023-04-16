@@ -104,7 +104,7 @@ uint32_t boostmillis;
 uint32_t buttonmillis;
 uint32_t goneMinutes;
 uint32_t goneSeconds;
-uint8_t SensorCounter = 255;
+uint8_t SensorCounter = 0;
 
 // Specify variable pointers and initial PID tuning parameters
 // 指定变量指针和初始PID调优参数
@@ -163,8 +163,8 @@ void setup() {
   // #endif
 
   // set the pin modes 设置引脚模式
-  pinMode(SENSOR_PIN, INPUT);
-  pinMode(VIN_PIN, INPUT);
+  pinMode(SENSOR_PIN, INPUT_PULLUP);
+  // pinMode(VIN_PIN, INPUT);
   pinMode(BUZZER_PIN, OUTPUT);
   // pinMode(CONTROL_PIN, OUTPUT);
   pinMode(BUTTON_P_PIN, INPUT_PULLUP);
@@ -405,8 +405,10 @@ void SENSORCheck() {
   delayMicroseconds(TIME2SETTLE);           // wait for voltage to settle 等待电压稳定
   double temp = denoiseAnalog(SENSOR_PIN);  // 读取ADC值的温度
 
-  if (!SensorCounter--)
+  if (SensorCounter++ > 20){
     Vin = getVIN();  // get Vin every now and then 时不时去获取VIN电压
+    SensorCounter = 0;
+  }
 
   if (!inLockMode) {
     float limit = 255;
