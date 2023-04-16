@@ -24,7 +24,7 @@
 #define BUTTON_N_PIN      2     // 2 键位为“-”
 #define CONTROL_PIN       5     // heater MOSFET PWM control 加热器MOSFET PWM控制
 #define CONTROL_CHANNEL   1     // PWM channel
-#define CONTROL_FREQ      10000 // PWM frequency
+#define CONTROL_FREQ      50000 // PWM frequency
 #define CONTROL_RES       8     // PWM resolution
 
 #define PD_CFG_0          16
