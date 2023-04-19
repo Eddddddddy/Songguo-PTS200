@@ -23,8 +23,8 @@
 #define BUTTON_P_PIN      4     // 1 键位为“+”
 #define BUTTON_N_PIN      2     // 2 键位为“-”
 #define CONTROL_PIN       5     // heater MOSFET PWM control 加热器MOSFET PWM控制
-#define CONTROL_CHANNEL   1     // PWM channel
-#define CONTROL_FREQ      50000 // PWM frequency
+#define CONTROL_CHANNEL   2     // PWM channel
+#define CONTROL_FREQ      200 // PWM frequency
 #define CONTROL_RES       8     // PWM resolution
 
 #define PD_CFG_0          16
@@ -38,7 +38,7 @@
 #define TEMP_SLEEP        150   // 休眠温度
 #define TEMP_BOOST        50    // 升温步进
 #define TEMP_STEP         10    // 旋转编码器温度变化步进
-#define TEMP_POWER_LIMIT  150   // 功率限制
+#define TEMP_POWER_LIMIT  100   // 功率限制
 
 // 默认的T12烙铁头温度校准值
 #define TEMP200           200   // temperature at ADC = 200 

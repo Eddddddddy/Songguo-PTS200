@@ -63,7 +63,7 @@ uint8_t timeOfBoost = TIMEOFBOOST;
 uint8_t MainScrType = MAINSCREEN;
 bool PIDenable = PID_ENABLE;
 bool beepEnable = BEEP_ENABLE;
-uint8_t VoltageValue = VOLTAGE_VALUE;
+volatile uint8_t VoltageValue = VOLTAGE_VALUE;
 bool QCEnable = QC_ENABLE;
 uint8_t WAKEUPthreshold = WAKEUP_THRESHOLD;
 bool restore_default_config = false;
@@ -142,6 +142,8 @@ bool MSC_Updating_Flag = false;
 
 // Button2 Obj
 Button2 btn;
+
+float limit = 0.0;
 
 void setup() {
   pinMode(14, INPUT);
@@ -230,7 +232,7 @@ void setup() {
 
   // turn on heater if iron temperature is well below setpoint
   // 如果烙铁头温度远低于设定值，则打开加热器
-  float limit = 255;
+  limit = 255;
   if (VoltageValue < 3) {
     limit = TEMP_POWER_LIMIT;
   }
@@ -346,7 +348,7 @@ void SLEEPCheck() {
     if (handleMoved) {  // if handle was moved 如果手柄被移动
       u8g2.setPowerSave(0);
       if (inSleepMode) {  // in sleep or off mode? 在睡眠模式还是关机模式?
-        float limit = 255;
+        limit = 255;
         if (VoltageValue < 3) {
           limit = TEMP_POWER_LIMIT;
         }
@@ -411,7 +413,7 @@ void SENSORCheck() {
   }
 
   if (!inLockMode) {
-    float limit = 255;
+    limit = 255;
     if (VoltageValue < 3) {
       limit = TEMP_POWER_LIMIT;
     }
@@ -511,7 +513,7 @@ void Thermostat() {
     else
       Output = 255;
   }
-  float limit = 255;
+  limit = 255;
   if (VoltageValue < 3) {
     limit = TEMP_POWER_LIMIT;
   }
@@ -1456,7 +1458,7 @@ void heatWithLimit() {
   // ledcSetup(channel, hertz, resolution);
   // ledcAttachPin(pin, channel);
 
-  float limit = 0;
+  limit = 0;
   if (VoltageValue < 3) {
     limit = TEMP_POWER_LIMIT;
   } else if (VoltageValue == 3) {

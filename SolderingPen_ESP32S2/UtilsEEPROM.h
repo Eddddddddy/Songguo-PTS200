@@ -34,7 +34,7 @@ extern uint8_t timeOfBoost;
 extern uint8_t MainScrType;
 extern bool PIDenable;
 extern bool beepEnable;
-extern uint8_t VoltageValue;
+extern volatile uint8_t VoltageValue;
 extern bool QCEnable;
 extern uint8_t WAKEUPthreshold;
 extern uint8_t CurrentTip;
