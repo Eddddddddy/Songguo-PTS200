@@ -38,7 +38,8 @@
 #define TEMP_SLEEP        150   // 休眠温度
 #define TEMP_BOOST        50    // 升温步进
 #define TEMP_STEP         10    // 旋转编码器温度变化步进
-#define TEMP_POWER_LIMIT  100   // 功率限制
+#define POWER_LIMIT_15    170   // 功率限制
+#define POWER_LIMIT_20    200   // 功率限制
 
 // 默认的T12烙铁头温度校准值
 #define TEMP200           200   // temperature at ADC = 200 

@@ -232,9 +232,9 @@ void setup() {
 
   // turn on heater if iron temperature is well below setpoint
   // 如果烙铁头温度远低于设定值，则打开加热器
-  limit = 255;
+  limit = POWER_LIMIT_20;
   if (VoltageValue < 3) {
-    limit = TEMP_POWER_LIMIT;
+    limit = POWER_LIMIT_15;
   }
   if (((CurrentTemp + 20) < DefaultTemp) && !inLockMode)
     ledcWrite(CONTROL_CHANNEL, constrain(HEATER_ON, 0, limit));
@@ -348,9 +348,9 @@ void SLEEPCheck() {
     if (handleMoved) {  // if handle was moved 如果手柄被移动
       u8g2.setPowerSave(0);
       if (inSleepMode) {  // in sleep or off mode? 在睡眠模式还是关机模式?
-        limit = 255;
+        limit = POWER_LIMIT_20;
         if (VoltageValue < 3) {
-          limit = TEMP_POWER_LIMIT;
+          limit = POWER_LIMIT_15;
         }
         if ((CurrentTemp + 20) < SetTemp)                              // if temp is well below setpoint 如果温度远低于设定值
           ledcWrite(CONTROL_CHANNEL, constrain(HEATER_ON, 0, limit));  // then start the heater right now 那现在就启动加热器
@@ -413,9 +413,9 @@ void SENSORCheck() {
   }
 
   if (!inLockMode) {
-    limit = 255;
+    limit = POWER_LIMIT_20;
     if (VoltageValue < 3) {
-      limit = TEMP_POWER_LIMIT;
+      limit = POWER_LIMIT_15;
     }
     ledcWrite(CONTROL_CHANNEL,
               constrain(HEATER_PWM, 0, limit));  // turn on again heater 再次打开加热器
@@ -513,9 +513,9 @@ void Thermostat() {
     else
       Output = 255;
   }
-  limit = 255;
+  limit = POWER_LIMIT_20;
   if (VoltageValue < 3) {
-    limit = TEMP_POWER_LIMIT;
+    limit = POWER_LIMIT_15;
   }
   ledcWrite(CONTROL_CHANNEL, constrain((HEATER_PWM), 0, limit));  // set heater PWM 设置加热器PWM
 }
@@ -1460,9 +1460,9 @@ void heatWithLimit() {
 
   limit = 0;
   if (VoltageValue < 3) {
-    limit = TEMP_POWER_LIMIT;
+    limit = POWER_LIMIT_15;
   } else if (VoltageValue == 3) {
-    limit = 255;
+    limit = POWER_LIMIT_20;
   }
   ledcWrite(CONTROL_CHANNEL,
             constrain(HEATER_PWM, 0, limit));  // turn on again heater 再次打开加热器
