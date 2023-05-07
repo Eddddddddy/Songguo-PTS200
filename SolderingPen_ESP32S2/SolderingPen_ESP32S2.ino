@@ -5,6 +5,7 @@
 #include <Button2.h>
 #include <QC3Control.h>
 
+//
 #include "FirmwareMSC.h"
 #include "Languages.h"
 #include "USB.h"
@@ -146,6 +147,10 @@ Button2 btn;
 float limit = 0.0;
 
 void setup() {
+  digitalWrite(PD_CFG_0, LOW);
+  digitalWrite(PD_CFG_1, HIGH);
+  digitalWrite(PD_CFG_2, LOW);
+
   pinMode(14, INPUT);
   pinMode(13, INPUT);
   // QC.set12V();
@@ -208,7 +213,9 @@ void setup() {
         QC.set12V();
         break;
       case 2:
-        QC.set12V();
+        {
+          QC.set12V();
+        }
         break;
       case 3:
         QC.set20V();
@@ -276,15 +283,22 @@ void setup() {
   // btn.setDebounceTime(25);
 }
 
+int SENSORCheckTimes = 0;
+
 void loop() {
   ROTARYCheck();  // check rotary encoder (temp/boost setting, enter setup menu)
                   // 检查旋转编码器(温度/升压设置，进入设置菜单)
   SLEEPCheck();   // check and activate/deactivate sleep modes
                   // 检查和激活/关闭睡眠模式
-  SENSORCheck();  // reads temperature and vibration switch of the iron
-                  // 读取烙铁头的温度和振动开关
-  Thermostat();   // heater control 加热器控制
-  MainScreen();   // updates the main page on the OLED 刷新OLED主界面
+  if (SENSORCheckTimes == 0) {
+    SENSORCheck();  // reads temperature and vibration switch of the iron
+                    // 读取烙铁头的温度和振动开关
+    SENSORCheckTimes = 10;
+  }
+  SENSORCheckTimes--;
+  
+  Thermostat();  // heater control 加热器控制
+  MainScreen();  // updates the main page on the OLED 刷新OLED主界面
 }
 
 // check rotary encoder; set temperature, toggle boost mode, enter setup menu
@@ -407,7 +421,7 @@ void SENSORCheck() {
   delayMicroseconds(TIME2SETTLE);           // wait for voltage to settle 等待电压稳定
   double temp = denoiseAnalog(SENSOR_PIN);  // 读取ADC值的温度
 
-  if (SensorCounter++ > 20){
+  if (SensorCounter++ > 20) {
     Vin = getVIN();  // get Vin every now and then 时不时去获取VIN电压
     SensorCounter = 0;
   }

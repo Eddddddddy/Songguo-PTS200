@@ -1,5 +1,5 @@
 // Firmware version
-#define VERSION "v4.2.2" //20230419
+#define VERSION "v4.2.3" //20230506
 #define VERSION_NUM 422
 
 // Type of MOSFET
@@ -39,7 +39,7 @@
 #define TEMP_BOOST        50    // 升温步进
 #define TEMP_STEP         10    // 旋转编码器温度变化步进
 #define POWER_LIMIT_15    170   // 功率限制
-#define POWER_LIMIT_20    200   // 功率限制
+#define POWER_LIMIT_20    250   // 功率限制
 
 // 默认的T12烙铁头温度校准值
 #define TEMP200           200   // temperature at ADC = 200 
@@ -58,11 +58,11 @@
 #define WAKEUP_THRESHOLD  50    // MPU 震动检测精度，数值越小，越灵敏
 
 // Control values
-#define TIME2SETTLE       2000  // 以微秒为单位的时间允许OpAmp输出稳定
+#define TIME2SETTLE       4000  // 以微秒为单位的时间允许OpAmp输出稳定
 #define SMOOTHIE          0.05  // OpAmp输出平滑系数 (1=无平滑; 默认：0.05)
 #define PID_ENABLE        false // enable PID control
 #define BEEP_ENABLE       true  // enable/disable buzzer
-#define VOLTAGE_VALUE     2     // 电压值
+#define VOLTAGE_VALUE     3     // 电压值
 #define QC_ENABLE         false // enable/disable QC3.0
 #define MAINSCREEN        1     // type of main screen (0: big numbers; 1: more infos)
 
