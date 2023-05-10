@@ -284,19 +284,21 @@ void setup() {
 }
 
 int SENSORCheckTimes = 0;
+long lastMillis = 0;
 
 void loop() {
   ROTARYCheck();  // check rotary encoder (temp/boost setting, enter setup menu)
                   // 检查旋转编码器(温度/升压设置，进入设置菜单)
   SLEEPCheck();   // check and activate/deactivate sleep modes
                   // 检查和激活/关闭睡眠模式
-  if (SENSORCheckTimes == 0) {
+
+  if (SENSORCheckTimes > 0) {
     SENSORCheck();  // reads temperature and vibration switch of the iron
                     // 读取烙铁头的温度和振动开关
-    SENSORCheckTimes = 10;
+    SENSORCheckTimes = 0;
   }
-  SENSORCheckTimes--;
-  
+  SENSORCheckTimes++;
+
   Thermostat();  // heater control 加热器控制
   MainScreen();  // updates the main page on the OLED 刷新OLED主界面
 }
@@ -421,7 +423,7 @@ void SENSORCheck() {
   delayMicroseconds(TIME2SETTLE);           // wait for voltage to settle 等待电压稳定
   double temp = denoiseAnalog(SENSOR_PIN);  // 读取ADC值的温度
 
-  if (SensorCounter++ > 20) {
+  if (SensorCounter++ > 10) {
     Vin = getVIN();  // get Vin every now and then 时不时去获取VIN电压
     SensorCounter = 0;
   }
@@ -1158,33 +1160,39 @@ void AddTipScreen() {
 //  VP+_Ru = 100k, Rd_GND = 1K
 uint16_t denoiseAnalog(byte port) {
   uint32_t result = 0;
+  float maxValue, minValue;
+  int resultArray[32];
 
-  for (uint8_t i = 0; i < 32; i++) {  // get 32 readings 得到32个读数
+  for (uint8_t i = 0; i < 32; i++) {  // get 32 readings and sort them 获取32个读数并对其进行排序
     float value, raw_adc;
-    //    if (analogRead(SENSOR_PIN) < 1300)
-    //    {
-    //      value = analogRead(SENSOR_PIN) * 1390 / 4095 * 0.4;   //原0.4
-    //    }
-    //    else if (1300 <= analogRead(SENSOR_PIN) && analogRead(SENSOR_PIN) <
-    //    2300)
-    //    {
-    //      value = analogRead(SENSOR_PIN) * 1390 / 4095 * 0.36;  //原0.357
-    //    }
-    //    else if (2300 <= analogRead(SENSOR_PIN) && analogRead(SENSOR_PIN) <
-    //    4095)
-    //      value = analogRead(SENSOR_PIN) * 1390 / 4095 * 0.31;   //原0.34
+
     raw_adc = adc_sensor.readMiliVolts();
-    //    value = constrain(0.6*raw_adc-40, 50, 1000);
     value = constrain(0.4432 * raw_adc + 29.665, 20, 1000);
-    //    Serial.println(raw_adc);
-    result += value;  // add them up 把它们加起来（结果与返回值）
-    //    result+=adc_sensor.readMiliVolts();
+
+    resultArray[i] = value;
   }
+
+  // sort resultArray with low time complexity 用低时间复杂度对resultArray进行排序
+  for (uint8_t i = 0; i < 32; i++) {
+    for (uint8_t j = i + 1; j < 32; j++) {
+      if (resultArray[i] > resultArray[j]) {
+        int temp = resultArray[i];
+        resultArray[i] = resultArray[j];
+        resultArray[j] = temp;
+      }
+    }
+  }
+
+  // get the average of the middle 20 readings 获取中间20个读数的平均值
+  for (uint8_t i = 6; i < 26; i++) {
+    result += resultArray[i];
+  }
+  
   //  Serial.printf("raw_val: %d", adc_sensor.readMiliVolts());
   //  Serial.println();
-  Serial.printf("val: %d", result / 32);
+  Serial.printf("val: %d", result / 20);
   Serial.println();
-  return (result >> 5);  // devide by 32 and return value 除以32并返回值
+  return (result / 20);  // devide by 32 and return value 除以32并返回值
 }
 
 // 读取SENSOR内部温度

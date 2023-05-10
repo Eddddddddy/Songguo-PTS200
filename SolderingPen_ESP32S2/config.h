@@ -1,5 +1,5 @@
 // Firmware version
-#define VERSION "v4.2.3" //20230506
+#define VERSION "v4.2.3" //20230510
 #define VERSION_NUM 422
 
 // Type of MOSFET
@@ -24,7 +24,7 @@
 #define BUTTON_N_PIN      2     // 2 键位为“-”
 #define CONTROL_PIN       5     // heater MOSFET PWM control 加热器MOSFET PWM控制
 #define CONTROL_CHANNEL   2     // PWM channel
-#define CONTROL_FREQ      200 // PWM frequency
+#define CONTROL_FREQ      200   // PWM frequency
 #define CONTROL_RES       8     // PWM resolution
 
 #define PD_CFG_0          16
@@ -39,7 +39,7 @@
 #define TEMP_BOOST        50    // 升温步进
 #define TEMP_STEP         10    // 旋转编码器温度变化步进
 #define POWER_LIMIT_15    170   // 功率限制
-#define POWER_LIMIT_20    250   // 功率限制
+#define POWER_LIMIT_20    255   // 功率限制
 
 // 默认的T12烙铁头温度校准值
 #define TEMP200           200   // temperature at ADC = 200 
@@ -58,7 +58,7 @@
 #define WAKEUP_THRESHOLD  50    // MPU 震动检测精度，数值越小，越灵敏
 
 // Control values
-#define TIME2SETTLE       4000  // 以微秒为单位的时间允许OpAmp输出稳定
+#define TIME2SETTLE       5000  // 以微秒为单位的时间允许OpAmp输出稳定
 #define SMOOTHIE          0.05  // OpAmp输出平滑系数 (1=无平滑; 默认：0.05)
 #define PID_ENABLE        false // enable PID control
 #define BEEP_ENABLE       true  // enable/disable buzzer
