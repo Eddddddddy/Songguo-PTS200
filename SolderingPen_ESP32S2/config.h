@@ -1,5 +1,5 @@
 // Firmware version
-#define VERSION "v4.3.0" //20230524
+#define VERSION "v4.3.1" //20230524
 #define VERSION_NUM 422
 
 // Type of MOSFET

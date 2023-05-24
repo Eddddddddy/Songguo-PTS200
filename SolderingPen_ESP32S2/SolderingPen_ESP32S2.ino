@@ -409,9 +409,9 @@ void SENSORCheck() {
       Serial.println("进入工作状态!");
     }*/
   // #if defined(LIS)
-  if (abs(accel.getX() - gx) > WAKEUP_THRESHOLD ||
-      abs(accel.getY() - gy) > WAKEUP_THRESHOLD ||
-      abs(accel.getZ() - gz) > WAKEUP_THRESHOLD) {
+  if (abs(accel.getX() - gx) > WAKEUPthreshold ||
+      abs(accel.getY() - gy) > WAKEUPthreshold ||
+      abs(accel.getZ() - gz) > WAKEUPthreshold) {
     gx = accel.getX();
     gy = accel.getY();
     gz = accel.getZ();
