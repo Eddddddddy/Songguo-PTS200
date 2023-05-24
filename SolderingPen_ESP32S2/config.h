@@ -1,5 +1,5 @@
 // Firmware version
-#define VERSION "v4.2.3" //20230510
+#define VERSION "v4.3.0" //20230524
 #define VERSION_NUM 422
 
 // Type of MOSFET
@@ -25,6 +25,7 @@
 #define CONTROL_PIN       5     // heater MOSFET PWM control 加热器MOSFET PWM控制
 #define CONTROL_CHANNEL   2     // PWM channel
 #define CONTROL_FREQ      200   // PWM frequency
+#define CONTROL_FREQ_20V  1000  // PWM frequency for 20V
 #define CONTROL_RES       8     // PWM resolution
 
 #define PD_CFG_0          16
@@ -59,6 +60,7 @@
 
 // Control values
 #define TIME2SETTLE       5000  // 以微秒为单位的时间允许OpAmp输出稳定
+#define TIME2SETTLE_20V   2000  // 以微秒为单位的时间允许OpAmp输出稳定
 #define SMOOTHIE          0.05  // OpAmp输出平滑系数 (1=无平滑; 默认：0.05)
 #define PID_ENABLE        false // enable PID control
 #define BEEP_ENABLE       true  // enable/disable buzzer
