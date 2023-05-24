@@ -1,0 +1,3 @@
+Please use the user version for regular upgrades. Connect the device to the computer with a USB cable, open the firmware upgrade option in the device's menu, and drag the firmware file into the device's MSC storage.
+
+If there is an upgrade failure or other problems with the firmware, you can use the factory version of the firmware and use the ESP flash tool to write the firmware at address 0x0000. Select ESP32S2-Develop-Internal USB to download.
