@@ -151,8 +151,8 @@ void setup() {
   digitalWrite(PD_CFG_1, HIGH);
   digitalWrite(PD_CFG_2, LOW);
 
-  pinMode(14, INPUT);
-  pinMode(13, INPUT);
+  // pinMode(14, INPUT);
+  // pinMode(13, INPUT);
   // QC.set12V();
   Serial.begin(115200);
   // delay(5000);
@@ -199,19 +199,21 @@ void setup() {
   pinMode(PD_CFG_2, OUTPUT);
 
   if (QCEnable) {
+    QC.begin();
+    delay(100);
     switch (VoltageValue) {
-      case 0:
+      case 0:{
         QC.set9V();
-        break;
-      case 1:
+      }break;
+      case 1:{
         QC.set12V();
-        break;
+      }break;
       case 2: {
         QC.set12V();
       } break;
-      case 3:
+      case 3:{
         QC.set20V();
-        break;
+      }break;
       default:
         break;
     }
