@@ -1,5 +1,5 @@
 // Firmware version
-#define VERSION "v4.3.2" //20230612
+#define VERSION "v4.4.0" //20230729
 #define VERSION_NUM 422
 
 // Type of MOSFET
@@ -56,7 +56,7 @@
 #define TIME2SLEEP        60    // 几秒钟后进入睡眠模式
 #define TIME2OFF          5     // 几分钟后就要关闭加热器了
 #define TIMEOFBOOST       60    // 停留在加热模式多少秒
-#define WAKEUP_THRESHOLD  50    // MPU 震动检测精度，数值越小，越灵敏
+#define WAKEUP_THRESHOLD  10    // MPU 震动检测精度，数值越小，越灵敏
 
 // Control values
 #define TIME2SETTLE       5000  // 以微秒为单位的时间允许OpAmp输出稳定

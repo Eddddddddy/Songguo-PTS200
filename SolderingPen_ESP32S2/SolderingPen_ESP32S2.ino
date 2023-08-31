@@ -49,6 +49,9 @@ SPARKFUN_LIS2DH12 accel;  // Create instance
   #endif*/
 
 int16_t gx = 0, gy = 0, gz = 0;
+uint16_t accels[32][3];
+uint8_t accelIndex = 0;
+#define ACCEL_SAMPLES 32
 
 // 定义积极和保守的PID调整参数
 double aggKp = 11, aggKi = 0.5, aggKd = 1;
@@ -202,18 +205,18 @@ void setup() {
     QC.begin();
     delay(100);
     switch (VoltageValue) {
-      case 0:{
+      case 0: {
         QC.set9V();
-      }break;
-      case 1:{
+      } break;
+      case 1: {
         QC.set12V();
-      }break;
+      } break;
       case 2: {
         QC.set12V();
       } break;
-      case 3:{
+      case 3: {
         QC.set20V();
-      }break;
+      } break;
       default:
         break;
     }
@@ -266,6 +269,12 @@ void setup() {
     delay(500);
     Serial.println("Accelerometer not detected.");
   }
+  // lis2dh12_block_data_update_set(&(accel.dev_ctx), PROPERTY_DISABLE);
+  // accel.setScale(LIS2DH12_2g);
+  // accel.setMode(LIS2DH12_HR_12bit);
+  // accel.setDataRate(LIS2DH12_ODR_400Hz);
+  // lis2dh12_fifo_mode_set(&(accel.dev_ctx), LIS2DH12_BYPASS_MODE);
+
   ChipTemp = getChipTemp();
   lastSENSORTmp = getMPUTemp();
   u8g2.initDisplay();
@@ -307,7 +316,6 @@ void ROTARYCheck() {
   // 根据旋转编码器值设定工作温度
   SetTemp = getRotary();
 
-  // check rotary encoder switch 检查旋转编码器开关
   uint8_t c = digitalRead(BUTTON_PIN);
   if (!c && c0) {
     beep();
@@ -411,15 +419,72 @@ void SENSORCheck() {
       Serial.println("进入工作状态!");
     }*/
   // #if defined(LIS)
-  if (abs(accel.getX() - gx) > WAKEUPthreshold ||
-      abs(accel.getY() - gy) > WAKEUPthreshold ||
-      abs(accel.getZ() - gz) > WAKEUPthreshold) {
-    gx = accel.getX();
-    gy = accel.getY();
-    gz = accel.getZ();
-    handleMoved = true;
-    //    Serial.println("进入工作状态!");
+
+  // if (abs(accel.getX() - gx) > WAKEUPthreshold ||
+  //     abs(accel.getY() - gy) > WAKEUPthreshold ||
+  //     abs(accel.getZ() - gz) > WAKEUPthreshold) {
+  //   gx = accel.getX();
+  //   gy = accel.getY();
+  //   gz = accel.getZ();
+  //   handleMoved = true;
+  //   //    Serial.println("进入工作状态!");
+  // }
+
+  // accel.getRawX() return int16_t
+
+  if (accel.available()) {
+    accels[accelIndex][0] = accel.getRawX() + 32768;
+    accels[accelIndex][1] = accel.getRawY() + 32768;
+    accels[accelIndex][2] = accel.getRawZ() + 32768;
+    accelIndex++;
+
+    // debug output
+    Serial.print("X: ");
+    Serial.print(accels[accelIndex][0]);
+    Serial.print(" Y: ");
+    Serial.print(accels[accelIndex][1]);
+    Serial.print(" Z: ");
+    Serial.println(accels[accelIndex][2]);
+
+    if (accelIndex >= ACCEL_SAMPLES) {
+      accelIndex = 0;
+      // cal variance
+      uint64_t avg[3] = {0, 0, 0};
+      for (int i = 0; i < ACCEL_SAMPLES; i++) {
+        avg[0] += accels[i][0];
+        avg[1] += accels[i][1];
+        avg[2] += accels[i][2];
+      }
+      avg[0] /= ACCEL_SAMPLES;
+      avg[1] /= ACCEL_SAMPLES;
+      avg[2] /= ACCEL_SAMPLES;
+      uint64_t var[3] = {0, 0, 0};
+      for (int i = 0; i < ACCEL_SAMPLES; i++) {
+        var[0] += (accels[i][0] - avg[0]) * (accels[i][0] - avg[0]);
+        var[1] += (accels[i][1] - avg[1]) * (accels[i][1] - avg[1]);
+        var[2] += (accels[i][2] - avg[2]) * (accels[i][2] - avg[2]);
+      }
+      var[0] /= ACCEL_SAMPLES;
+      var[1] /= ACCEL_SAMPLES;
+      var[2] /= ACCEL_SAMPLES;
+      // debug output
+      Serial.print("variance: ");
+      Serial.print(var[0]);
+      Serial.print(" ");
+      Serial.print(var[1]);
+      Serial.print(" ");
+      Serial.println(var[2]);
+
+      int varThreshold = WAKEUPthreshold * 10000;
+
+      if (var[0] > varThreshold || var[1] > varThreshold ||
+          var[2] > varThreshold) {
+        handleMoved = true;
+        //      Serial.println("进入工作状态!");
+      }
+    }
   }
+
   // #endif
 
   ledcWrite(CONTROL_CHANNEL,
@@ -433,7 +498,7 @@ void SENSORCheck() {
   long timems = millis();
   double temp = denoiseAnalog(SENSOR_PIN);  // 读取ADC值的温度
   lastMillis = millis() - timems;
-  Serial.println(lastMillis);
+  // Serial.println(lastMillis);
 
   if (SensorCounter++ > 10) {
     Vin = getVIN();  // get Vin every now and then 时不时去获取VIN电压
@@ -827,7 +892,7 @@ void TimerScreen() {
 // menu screen 菜单屏幕
 uint8_t MenuScreen(const char *Items[][language_types], uint8_t numberOfItems,
                    uint8_t selected) {
-  Serial.println(numberOfItems);
+  // Serial.println(numberOfItems);
   bool isTipScreen = ((strcmp(Items[0][language], "烙铁头:") == 0) ||
                       (strcmp(Items[0][language], "Tip:") == 0) ||
                       (strcmp(Items[0][language], "烙鐵頭:") == 0));
@@ -1187,8 +1252,8 @@ uint16_t denoiseAnalog(byte port) {
 
   //  Serial.printf("raw_val: %d", adc_sensor.readMiliVolts());
   //  Serial.println();
-  Serial.printf("val: %d", result / 4);
-  Serial.println();
+  // Serial.printf("val: %d", result / 4);
+  // Serial.println();
   return (result / 4);  // devide by 32 and return value 除以32并返回值
 }
 
