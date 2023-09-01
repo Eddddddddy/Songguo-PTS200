@@ -14,6 +14,7 @@ const char *SetupItems[][language_types] = { "菜单设置", "菜單設置", "Se
                                              "恢复默认设置", "恢復默認設置", "Restore Config",
                                              "更新版本", "更新版本", "Update Firmware",
                                              "Languages", "Languages", "Languages",
+                                             "切换左右手", "切换左右手", "Left/Right Hand",
                                              "返回", "返回", "Return" };
 const char *LanguagesItems[][language_types] = { "Languages", "Languages", "Languages",
                                                  "简体中文", "简体中文", "简体中文",
@@ -64,7 +65,8 @@ const char *VoltageItems[][language_types] = { "电压设置", "電壓設置", "
                                                "9V", "9V", "9V",
                                                "12V", "12V", "12V",
                                                "15V", "15V", "15V",
-                                               "20V", "20V", "20V" };
+                                               "20V(50%)", "20V(50%)", "20V(50%)",
+                                               "20V(100%)", "20V(100%)", "20V(100%)"};
 const char *QCItems[][language_types] = { "QC", "QC", "QC",
                                           "禁用", "禁用", "Disable",
                                           "启用", "啟用", "Enable" };

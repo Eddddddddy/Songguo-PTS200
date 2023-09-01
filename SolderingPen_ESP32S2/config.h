@@ -1,5 +1,5 @@
 // Firmware version
-#define VERSION "v4.4.0" //20230729
+#define VERSION "v4.5.0" //20230729
 #define VERSION_NUM 422
 
 // Type of MOSFET
@@ -41,6 +41,7 @@
 #define TEMP_STEP         10    // 旋转编码器温度变化步进
 #define POWER_LIMIT_15    170   // 功率限制
 #define POWER_LIMIT_20    255   // 功率限制
+#define POWER_LIMIT_20_2  127   // 功率限制
 
 // 默认的T12烙铁头温度校准值
 #define TEMP200           200   // temperature at ADC = 200 
@@ -86,3 +87,6 @@
 
 //Language
 #define DEFAULT_LANGUAGE  0
+
+//Hand side
+#define DEFAULT_HAND_SIDE 0

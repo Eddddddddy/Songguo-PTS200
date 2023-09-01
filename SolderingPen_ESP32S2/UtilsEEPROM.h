@@ -20,8 +20,9 @@
 #define ADDR_CAL_TEMP ADDR_TIP_NAME + TIPNAMELENGTH *TIPMAX
 
 #define ADDR_LANGUAGE ADDR_CAL_TEMP + 2 * CALNUM *TIPMAX
+#define ADDR_HAND_SIDE ADDR_LANGUAGE + 1
 
-#define ADDR_EEPROM_SIZE ADDR_LANGUAGE + 1
+#define ADDR_EEPROM_SIZE ADDR_HAND_SIDE + 1
 
 bool system_init_flag = false;
 
@@ -44,6 +45,7 @@ extern char TipName[TIPMAX][TIPNAMELENGTH];
 extern uint16_t CalTemp[TIPMAX][CALNUM];
 
 extern uint8_t language;
+extern uint8_t hand_side;
 
 bool write_default_EEPROM()
 {
@@ -80,6 +82,7 @@ bool write_default_EEPROM()
   }
 
   EEPROM.writeUChar(ADDR_LANGUAGE, DEFAULT_LANGUAGE);
+  EEPROM.writeUChar(ADDR_HAND_SIDE, DEFAULT_HAND_SIDE);
 
   EEPROM.writeUInt(ADDR_SYSTEM_INIT_FLAG, VERSION_NUM);
 
@@ -139,6 +142,7 @@ bool update_EEPROM()
   }
 
   EEPROM.writeUChar(ADDR_LANGUAGE, language);
+  EEPROM.writeUChar(ADDR_HAND_SIDE, hand_side);
 
   EEPROM.writeUInt(ADDR_SYSTEM_INIT_FLAG, VERSION_NUM);
 
@@ -196,6 +200,7 @@ bool read_EEPROM()
   }
 
   language = EEPROM.readUChar(ADDR_LANGUAGE);
+  hand_side = EEPROM.readUChar(ADDR_HAND_SIDE);
 
   return true;
 }

@@ -15,6 +15,10 @@ QC3Control QC(14, 13);
 // QC.set12V();
 
 #include <U8g2lib.h>  // https://github.com/olikraus/u8g2
+// font
+#include "PTS200_16.h"
+
+
 // #include<analogWrite.h>
 #include <ESP32AnalogRead.h>  //Click here to get the library: http://librarymanager/All#ESP32AnalogRead
 
@@ -140,6 +144,9 @@ ESP32AnalogRead adc_vin;
 // Language
 uint8_t language = 0;
 
+// Hand Side
+uint8_t hand_side = 0;
+
 // MSC Firmware
 FirmwareMSC MSC_Update;
 bool MSC_Updating_Flag = false;
@@ -217,6 +224,9 @@ void setup() {
       case 3: {
         QC.set20V();
       } break;
+      case 4: {
+        QC.set20V();
+      } break;
       default:
         break;
     }
@@ -265,6 +275,7 @@ void setup() {
   // #elif defined(LIS)
   //   u8g2.setBusClock(100000);
   Wire.begin();
+  Wire.setClock(400000);
   if (accel.begin() == false) {
     delay(500);
     Serial.println("Accelerometer not detected.");
@@ -280,6 +291,12 @@ void setup() {
   u8g2.initDisplay();
   u8g2.begin();
   u8g2.enableUTF8Print();
+  if(hand_side){
+    u8g2.setDisplayRotation(U8G2_R3);
+  }else{
+    u8g2.setDisplayRotation(U8G2_R1);
+  }
+
 
   // btn.begin(BUTTON_PIN);
   // btn.setDoubleClickHandler(turnOffHeater);
@@ -290,6 +307,7 @@ int SENSORCheckTimes = 0;
 long lastMillis = 0;
 
 void loop() {
+  long timems = millis();
   ROTARYCheck();  // check rotary encoder (temp/boost setting, enter setup menu)
                   // 检查旋转编码器(温度/升压设置，进入设置菜单)
   SLEEPCheck();  // check and activate/deactivate sleep modes
@@ -307,6 +325,8 @@ void loop() {
 
   Thermostat();  // heater control 加热器控制
   MainScreen();  // updates the main page on the OLED 刷新OLED主界面
+  lastMillis = millis() - timems;
+  Serial.println(lastMillis);
 }
 
 // check rotary encoder; set temperature, toggle boost mode, enter setup menu
@@ -318,31 +338,36 @@ void ROTARYCheck() {
 
   uint8_t c = digitalRead(BUTTON_PIN);
   if (!c && c0) {
-    beep();
-    buttonmillis = millis();
-    while ((!digitalRead(BUTTON_PIN)) && ((millis() - buttonmillis) < 500))
-      ;
-    if ((millis() - buttonmillis) >= 500) {
-      SetupScreen();
-    } else {
-      if (inLockMode) {
-        inLockMode = false;
+    delay(10);
+    if (digitalRead(BUTTON_PIN) == c) {
+      beep();
+      buttonmillis = millis();
+      delay(10);
+      while ((!digitalRead(BUTTON_PIN)) && ((millis() - buttonmillis) < 500))
+        ;
+      delay(10);
+      if ((millis() - buttonmillis) >= 500) {
+        SetupScreen();
       } else {
-        buttonmillis = millis();
-        while ((digitalRead(BUTTON_PIN)) && ((millis() - buttonmillis) < 100))
-          ;
-        if ((millis() - buttonmillis) >= 100) {
-          if (inOffMode) {
-            inOffMode = false;
-          } else {
-            inBoostMode = !inBoostMode;
-            if (inBoostMode) {
-              boostmillis = millis();
-            }
-            handleMoved = true;
-          }
+        if (inLockMode) {
+          inLockMode = false;
         } else {
-          inOffMode = true;
+          buttonmillis = millis();
+          while ((digitalRead(BUTTON_PIN)) && ((millis() - buttonmillis) < 200))
+            delay(10);
+          if ((millis() - buttonmillis) >= 200) {  // single click
+            if (inOffMode) {
+              inOffMode = false;
+            } else {
+              inBoostMode = !inBoostMode;
+              if (inBoostMode) {
+                boostmillis = millis();
+              }
+              handleMoved = true;
+            }
+          } else {  // double click
+            inOffMode = true;
+          }
         }
       }
     }
@@ -439,12 +464,12 @@ void SENSORCheck() {
     accelIndex++;
 
     // debug output
-    Serial.print("X: ");
-    Serial.print(accels[accelIndex][0]);
-    Serial.print(" Y: ");
-    Serial.print(accels[accelIndex][1]);
-    Serial.print(" Z: ");
-    Serial.println(accels[accelIndex][2]);
+    // Serial.print("X: ");
+    // Serial.print(accels[accelIndex][0]);
+    // Serial.print(" Y: ");
+    // Serial.print(accels[accelIndex][1]);
+    // Serial.print(" Z: ");
+    // Serial.println(accels[accelIndex][2]);
 
     if (accelIndex >= ACCEL_SAMPLES) {
       accelIndex = 0;
@@ -468,12 +493,12 @@ void SENSORCheck() {
       var[1] /= ACCEL_SAMPLES;
       var[2] /= ACCEL_SAMPLES;
       // debug output
-      Serial.print("variance: ");
-      Serial.print(var[0]);
-      Serial.print(" ");
-      Serial.print(var[1]);
-      Serial.print(" ");
-      Serial.println(var[2]);
+      // Serial.print("variance: ");
+      // Serial.print(var[0]);
+      // Serial.print(" ");
+      // Serial.print(var[1]);
+      // Serial.print(" ");
+      // Serial.println(var[2]);
 
       int varThreshold = WAKEUPthreshold * 10000;
 
@@ -609,6 +634,8 @@ void Thermostat() {
   limit = POWER_LIMIT_20;
   if (VoltageValue < 3) {
     limit = POWER_LIMIT_15;
+  } else if(VoltageValue == 3){
+    limit = POWER_LIMIT_20_2;
   }
   ledcWrite(CONTROL_CHANNEL,
             constrain((HEATER_PWM), 0, limit));  // set heater PWM 设置加热器PWM
@@ -655,7 +682,7 @@ void MainScreen() {
     // u8g2.setCursor(0, 0);
     // u8g2.print(F("nihao"));
     //  draw setpoint temperature
-    u8g2.setFont(u8g2_font_unifont_t_chinese3);
+    u8g2.setFont(PTS200_16);
     u8g2.setFontPosTop();
     //    u8g2.drawUTF8(0, 0 + SCREEN_OFFSET, "设温:");
     u8g2.drawUTF8(0, 0 + SCREEN_OFFSET, txt_set_temp[language]);
@@ -793,6 +820,16 @@ void SetupScreen() {
         Serial.println(language);
         repeat = false;
       } break;
+      case 11: {
+        if(hand_side == 0){
+          u8g2.setDisplayRotation(U8G2_R3);
+          hand_side = 1;
+        }else{
+          u8g2.setDisplayRotation(U8G2_R1);
+          hand_side = 0;
+        }
+        repeat = false;
+      } break;
       default:
         repeat = false;
         break;
@@ -919,7 +956,7 @@ uint8_t MenuScreen(const char *Items[][language_types], uint8_t numberOfItems,
     lastselected = selected;
     u8g2.firstPage();
     do {
-      u8g2.setFont(u8g2_font_unifont_t_chinese3);
+      u8g2.setFont(PTS200_16);
       u8g2.setFontPosTop();
       u8g2.drawUTF8(0, 0 + SCREEN_OFFSET, Items[0][language]);
       if (isTipScreen)
@@ -947,7 +984,7 @@ void MessageScreen(const char *Items[][language_types], uint8_t numberOfItems) {
   bool lastbutton = (!digitalRead(BUTTON_PIN));
   u8g2.firstPage();
   do {
-    u8g2.setFont(u8g2_font_unifont_t_chinese3);
+    u8g2.setFont(PTS200_16);
     u8g2.setFontPosTop();
     for (uint8_t i = 0; i < numberOfItems; i++)
       u8g2.drawUTF8(0, i * 16, Items[i][language]);
@@ -970,7 +1007,7 @@ uint16_t InputScreen(const char *Items[][language_types]) {
     value = getRotary();
     u8g2.firstPage();
     do {
-      u8g2.setFont(u8g2_font_unifont_t_chinese3);
+      u8g2.setFont(PTS200_16);
       u8g2.setFontPosTop();
       u8g2.drawUTF8(0, 0 + SCREEN_OFFSET, Items[0][language]);
       u8g2.setCursor(0, 32);
@@ -1004,7 +1041,7 @@ void InfoScreen() {
     float fTmp = getChipTemp();      // read cold junction temperature
     u8g2.firstPage();
     do {
-      u8g2.setFont(u8g2_font_unifont_t_chinese3);
+      u8g2.setFont(PTS200_16);
       u8g2.setFontPosTop();
       u8g2.setCursor(0, 0 + SCREEN_OFFSET);
       u8g2.print(txt_temp[language]);
@@ -1051,7 +1088,7 @@ void ChangeTipScreen() {
     lastselected = selected;
     u8g2.firstPage();
     do {
-      u8g2.setFont(u8g2_font_unifont_t_chinese3);
+      u8g2.setFont(PTS200_16);
       u8g2.setFontPosTop();
       //      strcpy_P(F_Buffer, PSTR("选择烙铁头"));
       u8g2.drawUTF8(0, 0 + SCREEN_OFFSET, txt_select_tip[language]);
@@ -1092,7 +1129,7 @@ void CalibrationScreen() {
 
       u8g2.firstPage();
       do {
-        u8g2.setFont(u8g2_font_unifont_t_chinese3);
+        u8g2.setFont(PTS200_16);
         u8g2.setFontPosTop();
         //        strcpy_P(F_Buffer, PSTR("校准"));
         u8g2.drawUTF8(0, 0 + SCREEN_OFFSET, txt_calibrate[language]);
@@ -1162,7 +1199,7 @@ void InputNameScreen() {
       }
       u8g2.firstPage();
       do {
-        u8g2.setFont(u8g2_font_unifont_t_chinese3);
+        u8g2.setFont(PTS200_16);
         u8g2.setFontPosTop();
         u8g2.drawUTF8(0, 0 + SCREEN_OFFSET, txt_enter_tip_name[language]);
         u8g2.setCursor(12 * digit, 48 + SCREEN_OFFSET);
@@ -1344,7 +1381,13 @@ void Button_loop() {
   if (!digitalRead(BUTTON_N_PIN) && a0 == 1) {
     delay(BUTTON_DELAY);
     if (!digitalRead(BUTTON_N_PIN)) {
+      int count0 = count;
       count = constrain(count + countStep, countMin, countMax);
+      if (!(countMin == TEMP_MIN && countMax == TEMP_MAX)) {
+        if (count0 + countStep > countMax) {
+          count = countMin;
+        }
+      }
       a0 = 0;
     }
   } else if (!digitalRead(BUTTON_N_PIN) && a0 == 0) {
@@ -1361,7 +1404,13 @@ void Button_loop() {
   if (!digitalRead(BUTTON_P_PIN) && b0 == 1) {
     delay(BUTTON_DELAY);
     if (!digitalRead(BUTTON_P_PIN)) {
+      int count0 = count;
       count = constrain(count - countStep, countMin, countMax);
+      if (!(countMin == TEMP_MIN && countMax == TEMP_MAX)) {
+        if (count0 - countStep < countMin) {
+          count = countMax;
+        }
+      }
       b0 = 0;
     }
   } else if (!digitalRead(BUTTON_P_PIN) && b0 == 0) {
@@ -1394,6 +1443,11 @@ void PD_Update() {
       digitalWrite(PD_CFG_2, HIGH);
     } break;
     case 3: {
+      digitalWrite(PD_CFG_0, LOW);
+      digitalWrite(PD_CFG_1, HIGH);
+      digitalWrite(PD_CFG_2, LOW);
+    } break;
+    case 4: {
       digitalWrite(PD_CFG_0, LOW);
       digitalWrite(PD_CFG_1, HIGH);
       digitalWrite(PD_CFG_2, LOW);
