@@ -686,7 +686,10 @@ void MainScreen() {
     u8g2.setFontPosTop();
     //    u8g2.drawUTF8(0, 0 + SCREEN_OFFSET, "设温:");
     u8g2.drawUTF8(0, 0 + SCREEN_OFFSET, txt_set_temp[language]);
-    u8g2.setCursor(40, 0 + SCREEN_OFFSET);
+    if(language == 2)
+      u8g2.setCursor(8, 0 + SCREEN_OFFSET);
+    else
+      u8g2.setCursor(40, 0 + SCREEN_OFFSET);
     u8g2.print(Setpoint, 0);
 
     // draw status of heater 绘制加热器状态
