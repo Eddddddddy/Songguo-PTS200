@@ -549,9 +549,11 @@ void SENSORCheck() {
   if ((ShowTemp != Setpoint) || (abs(ShowTemp - CurrentTemp) > 5))
     ShowTemp = CurrentTemp;
   if (abs(ShowTemp - Setpoint) <= 1) ShowTemp = Setpoint;
-  if (inLockMode) {
-    ShowTemp = 0;
-  }
+  
+  // Don't show fake 0 for temp. Tip can still be very hot after reboot.
+  // if (inLockMode) {
+  //   ShowTemp = 0;
+  // }
 
   // set state variable if temperature is in working range; beep if working
   // temperature was just reached
