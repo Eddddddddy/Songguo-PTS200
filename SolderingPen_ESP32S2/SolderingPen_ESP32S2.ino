@@ -549,9 +549,11 @@ void SENSORCheck() {
   if ((ShowTemp != Setpoint) || (abs(ShowTemp - CurrentTemp) > 5))
     ShowTemp = CurrentTemp;
   if (abs(ShowTemp - Setpoint) <= 1) ShowTemp = Setpoint;
-  if (inLockMode) {
-    ShowTemp = 0;
-  }
+  
+  // Don't show fake 0 for temp. Tip can still be very hot after reboot.
+  // if (inLockMode) {
+  //   ShowTemp = 0;
+  // }
 
   // set state variable if temperature is in working range; beep if working
   // temperature was just reached
@@ -682,29 +684,59 @@ void MainScreen() {
     // u8g2.setCursor(0, 0);
     // u8g2.print(F("nihao"));
     //  draw setpoint temperature
-    u8g2.setFont(PTS200_16);
-    u8g2.setFontPosTop();
+    
     //    u8g2.drawUTF8(0, 0 + SCREEN_OFFSET, "设温:");
-    u8g2.drawUTF8(0, 0 + SCREEN_OFFSET, txt_set_temp[language]);
-    u8g2.setCursor(40, 0 + SCREEN_OFFSET);
+    u8g2.setFontPosTop();
+    if(language == 2){
+      u8g2.setFont(u8g2_font_unifont_t_symbols);
+      u8g2.drawUTF8(0, 2 + SCREEN_OFFSET, txt_set_temp[language]);
+      u8g2.setCursor(8, 0 + SCREEN_OFFSET);
+      u8g2.setFont(PTS200_16);
+    }
+    else{
+      u8g2.setFont(PTS200_16);
+      u8g2.drawUTF8(0, 0 + SCREEN_OFFSET, txt_set_temp[language]);
+      u8g2.setCursor(40, 0 + SCREEN_OFFSET);
+    }
     u8g2.print(Setpoint, 0);
 
     // draw status of heater 绘制加热器状态
     u8g2.setCursor(96, 0 + SCREEN_OFFSET);
-    if (ShowTemp > 500)
+    if (ShowTemp > 500){
+      if(language == 2)
+        u8g2.setCursor(78, 0 + SCREEN_OFFSET);
       u8g2.print(txt_error[language]);
-    else if (inOffMode || inLockMode)
+    }
+    else if(inOffMode || inLockMode){
+      if(language == 2)
+        u8g2.setCursor(96, 0 + SCREEN_OFFSET);
       u8g2.print(txt_off[language]);
-    else if (inSleepMode)
+    }
+    else if (inSleepMode){
+      if(language == 2)
+        u8g2.setCursor(78, 0 + SCREEN_OFFSET);
       u8g2.print(txt_sleep[language]);
-    else if (inBoostMode)
+    }
+    else if (inBoostMode){
+      if(language == 2)
+        u8g2.setCursor(74, 0 + SCREEN_OFFSET);
       u8g2.print(txt_boost[language]);
-    else if (isWorky)
+    }
+    else if (isWorky){
+      if(language == 2)
+        u8g2.setCursor(81, 0 + SCREEN_OFFSET);
       u8g2.print(txt_worky[language]);
-    else if (Output < 180)
+    }
+    else if (Output < 180){
+      if(language == 2)
+        u8g2.setCursor(86, 0 + SCREEN_OFFSET);
       u8g2.print(txt_on[language]);
-    else
+    }
+    else{
+      if(language == 2)
+        u8g2.setCursor(86, 0 + SCREEN_OFFSET);
       u8g2.print(txt_hold[language]);
+    }
 
     // rest depending on main screen type 休息取决于主屏幕类型
     if (MainScrType) {
@@ -720,7 +752,10 @@ void MainScreen() {
       u8g2.setCursor(0, 50);
       u8g2.print(lastSENSORTmp, 1);
       u8g2.print(F("C"));
-      u8g2.setCursor(83, 50);
+      if(fVin >= 10.0)
+        u8g2.setCursor(79, 50);
+      else
+        u8g2.setCursor(88, 50);
       u8g2.print(fVin, 1);
       u8g2.print(F("V"));
       // draw current temperature 绘制当前温度
