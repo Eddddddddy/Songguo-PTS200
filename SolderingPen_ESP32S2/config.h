@@ -1,5 +1,5 @@
 // Firmware version
-#define VERSION "v4.5.0" //20230729
+#define VERSION "v4.5.1" //20231203
 #define VERSION_NUM 422
 
 // Type of MOSFET
@@ -9,7 +9,7 @@
 // #define SSD1306
 #define SH1107
 //typedef u8g2_uint_t u8g_uint_t;
-#define SCREEN_OFFSET     3
+#define SCREEN_OFFSET     2
 
 // 旋转编码器的类型
 #define ROTARY_TYPE       0     // 0: 2 increments/step; 1: 4 increments/step (default)
@@ -89,4 +89,4 @@
 #define DEFAULT_LANGUAGE  0
 
 //Hand side
-#define DEFAULT_HAND_SIDE 0
+#define DEFAULT_HAND_SIDE 1
