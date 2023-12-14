@@ -1,4 +1,11 @@
 # Songguo PTS200 
+
+## 琴梨梨改了啥
+添加了开屏画面  
+开屏画面是128x64的XBM格式，由于OLED反色特性，要显示白字黑底需要做白底黑字的图  
+把XBM里面的unsigned char替换到splash.h里面即可  
+目前的开屏图案是Ciallo～(∠・ω< )⌒☆  
+
 ## Introduction
 1. PD3.0 and QC3 fast charge protocol
 
