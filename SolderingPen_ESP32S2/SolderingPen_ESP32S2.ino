@@ -36,6 +36,9 @@ QC3Control QC(14, 13);
 // https://github.com/mblythe86/C-PID-Library/tree/master/PID_v1)
 #include <EEPROM.h>  // 用于将用户设置存储到EEPROM
 
+//自定义开屏
+#include "splash.h"
+
 // 选择加速度计芯片
 // #define MPU
 #define LIS
@@ -297,6 +300,12 @@ void setup() {
   }else{
     u8g2.setDisplayRotation(U8G2_R1);
   }
+
+    u8g2.firstPage();  
+    do {
+     u8g2.drawXBMP(0, 0, 128 , 64, SPLASH_bits);
+    } while (u8g2.nextPage());
+    delay(1000);
 
 
   // btn.begin(BUTTON_PIN);

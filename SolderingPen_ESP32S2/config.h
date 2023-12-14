@@ -1,5 +1,5 @@
 // Firmware version
-#define VERSION "v4.5.1" //20231203
+#define VERSION "QINLILI-452" //20231203
 #define VERSION_NUM 422
 
 // Type of MOSFET
