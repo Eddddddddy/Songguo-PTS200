@@ -1296,7 +1296,8 @@ uint16_t denoiseAnalog(byte port) {
     float value, raw_adc;
 
     raw_adc = adc_sensor.readMiliVolts();
-    value = constrain(0.4432 * raw_adc + 29.665, 20, 1000);
+    // value = constrain(0.4432 * raw_adc + 29.665, 20, 1000);
+    value = constrain(0.5378 * raw_adc + 6.3959, 20, 1000); // y = 0.5378x + 6.3959
 
     resultArray[i] = value;
   }
