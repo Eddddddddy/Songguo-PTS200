@@ -759,7 +759,6 @@ void MainScreen() {
 void SetupScreen() {
   ledcWrite(CONTROL_CHANNEL, HEATER_OFF);  // shut off heater
   beep();
-  uint16_t SaveSetTemp = SetTemp;
   uint8_t selection = 0;
   bool repeat = true;
 
@@ -848,7 +847,7 @@ void SetupScreen() {
   }
   updateEEPROM();
   handleMoved = true;
-  SetTemp = SaveSetTemp;
+  SetTemp = DefaultTemp;
   setRotary(TEMP_MIN, TEMP_MAX, TEMP_STEP, SetTemp);
 }
 
