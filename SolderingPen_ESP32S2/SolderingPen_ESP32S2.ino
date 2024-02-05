@@ -291,6 +291,7 @@ void setup() {
   lastSENSORTmp = getMPUTemp();
   u8g2.initDisplay();
   u8g2.begin();
+  u8g2.sendF("ca", 0xa8, 0x3f);
   u8g2.enableUTF8Print();
   if(hand_side){
     u8g2.setDisplayRotation(U8G2_R3);
